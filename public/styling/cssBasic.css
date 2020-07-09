@@ -236,7 +236,7 @@ color:#add8e6;
   animation-fill-mode: forwards;
   animation-play-state: running;
 }
-/*
+
 .visitedObjectNode {
   background-image: url(diamond.svg);
   background-position: center;
@@ -251,7 +251,7 @@ color:#add8e6;
   animation-fill-mode: forwards;
   animation-play-state: running;
 }
-*/
+
 .visitedTargetNodeBlue {
   background-image: url(circle.svg);
   background-position: center;
@@ -618,7 +618,7 @@ color:#add8e6;
   border: 1px solid rgb(175, 216, 248);
   background-color: rgb(255, 254, 106)
 }
-
+*/
 .object{
   background-image: url(diamond.svg);
   background-position: center;
@@ -633,7 +633,7 @@ color:#add8e6;
   animation-fill-mode: forwards;
   animation-play-state: running;
 }
-*/
+
 .instantobjectTransparent{
   /*border: 1px solid rgb(175, 216, 248);*/
   opacity: 0.5;
