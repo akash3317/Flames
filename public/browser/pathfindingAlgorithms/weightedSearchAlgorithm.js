@@ -19,7 +19,7 @@ function weightedSearchAlgorithm(nodes, start, target, nodesToAnimate, boardArra
     nodesToAnimate.push(currentNode);
     currentNode.status = "visited";
     if (currentNode.id === target) return "success!";
-    if (name === "CLA" || name === "greedy") {
+    if (name === "greedy") {
       updateNeighbors(nodes, currentNode, boardArray, target, name, start, heuristic);
     } else if (name === "dijkstra") {
       updateNeighbors(nodes, currentNode, boardArray);
@@ -63,17 +63,7 @@ function averageNumberOfNodesBetween(currentNode) {
 function updateNode(currentNode, targetNode, actualTargetNode, name, nodes, actualStartNode, heuristic, boardArray) {
   let distance = getDistance(currentNode, targetNode);
   let distanceToCompare;
-  if (actualTargetNode && name === "CLA") {
-    let weight = targetNode.weight === 15 ? 15 : 1;
-    if (heuristic === "manhattanDistance") {
-      distanceToCompare = currentNode.distance + (distance[0] + weight) * manhattanDistance(targetNode, actualTargetNode);
-    } else if (heuristic === "poweredManhattanDistance") {
-      distanceToCompare = currentNode.distance + targetNode.weight + distance[0] + Math.pow(manhattanDistance(targetNode, actualTargetNode), 2);
-    } else if (heuristic === "extraPoweredManhattanDistance") {
-      distanceToCompare = currentNode.distance + (distance[0] + weight) * Math.pow(manhattanDistance(targetNode, actualTargetNode), 7);
-    }
-    let startNodeManhattanDistance = manhattanDistance(actualStartNode, actualTargetNode);
-  } else if (actualTargetNode && name === "greedy") {
+  if (actualTargetNode && name === "greedy") {
     distanceToCompare = targetNode.weight + distance[0] + manhattanDistance(targetNode, actualTargetNode);
   } else {
     distanceToCompare = currentNode.distance + targetNode.weight + distance[0];

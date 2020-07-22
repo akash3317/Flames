@@ -293,27 +293,27 @@ function launchInstantAnimations(board, success, type, object, algorithm, heuris
 module.exports = launchInstantAnimations;
 
 },{"../pathfindingAlgorithms/unweightedSearchAlgorithm":15,"../pathfindingAlgorithms/weightedSearchAlgorithm":16}],3:[function(require,module,exports){
-function mazeGenerationAnimations(board) {
-  let nodes = board.wallsToAnimate.slice(0);
-  let speed = board.speed === "fast" ?
-    5 : board.speed === "average" ?
-      25 : 75;
-  function timeout(index) {
-    setTimeout(function () {
-        if (index === nodes.length){
-          board.wallsToAnimate = [];
-          board.toggleButtons();
-          return;
-        }
-        nodes[index].className = board.nodes[nodes[index].id].weight === 15 ? "unvisited weight" : "wall";
-        timeout(index + 1);
-    }, speed);
-  }
+ function mazeGenerationAnimations(board) {
+   let nodes = board.wallsToAnimate.slice(0);
+   let speed = board.speed === "fast" ?
+     5 : board.speed === "average" ?
+       25 : 75;
+   function timeout(index) {
+     setTimeout(function () {
+         if (index === nodes.length){
+           board.wallsToAnimate = [];
+           board.toggleButtons();
+           return;
+         }
+         nodes[index].className = board.nodes[nodes[index].id].weight === 15 ? "unvisited weight" : "wall";
+         timeout(index + 1);
+     }, speed);
+   }
 
-  timeout(0);
-};
+   timeout(0);
+ };
 
-module.exports = mazeGenerationAnimations;
+ module.exports = mazeGenerationAnimations;
 
 },{}],4:[function(require,module,exports){
 const Node = require("./node");
@@ -723,25 +723,6 @@ Board.prototype.drawShortestPathTimeout = function(targetNodeId, startNodeId, ty
 
 };
 
-Board.prototype.createMazeOne = function(type) {
-  Object.keys(this.nodes).forEach(node => {
-    let random = Math.random();
-    let currentHTMLNode = document.getElementById(node);
-    let relevantClassNames = ["start", "target", "object"]
-    let randomTwo = type === "wall" ? 0.25 : 0.35;
-    if (random < randomTwo && !relevantClassNames.includes(currentHTMLNode.className)) {
-      if (type === "wall") {
-        currentHTMLNode.className = "wall";
-        this.nodes[node].status = "wall";
-        this.nodes[node].weight = 0;
-      } else if (type === "weight") {
-        currentHTMLNode.className = "unvisited weight";
-        this.nodes[node].status = "unvisited";
-        this.nodes[node].weight = 15;
-      }
-    }
-  });
-};
 
 Board.prototype.clearPath = function(clickedButton) {
   if (clickedButton) {
@@ -848,17 +829,6 @@ Board.prototype.clearWalls = function() {
   });
 }
 
-Board.prototype.clearWeights = function() {
-  Object.keys(this.nodes).forEach(id => {
-    let currentNode = this.nodes[id];
-    let currentHTMLNode = document.getElementById(id);
-    if (currentNode.weight === 15) {
-      currentNode.status = "unvisited";
-      currentNode.weight = 0;
-      currentHTMLNode.className = "unvisited";
-    }
-  });
-}
 
 Board.prototype.clearNodeStatuses = function() {
   Object.keys(this.nodes).forEach(id => {
@@ -877,7 +847,7 @@ Board.prototype.clearNodeStatuses = function() {
 };
 
 Board.prototype.instantAlgorithm = function() {
-  let weightedAlgorithms = ["dijkstra", "CLA", "greedy"];
+  let weightedAlgorithms = ["dijkstra", "greedy"];
   let unweightedAlgorithms = ["dfs", "bfs"];
   let success;
   if (this.currentAlgorithm === "bidirectional") {
@@ -963,13 +933,8 @@ Board.prototype.changeStartNodeImages = function() {
     name = "A* Search";
   } else if (this.currentAlgorithm === "greedy") {
     name = "Greedy Best-first Search";
-  } else if (this.currentAlgorithm === "CLA" && this.currentHeuristic !== "extraPoweredManhattanDistance") {
-    name = "Swarm Algorithm";
-  } else if (this.currentAlgorithm === "CLA" && this.currentHeuristic === "extraPoweredManhattanDistance") {
-    name = "Convergent Swarm Algorithm";
-  } else if (this.currentAlgorithm === "bidirectional") {
-    name = "Bidirectional Swarm Algorithm";
   }
+  
   if (unweighted.includes(this.currentAlgorithm)) {
     if (this.currentAlgorithm === "dfs") {
       document.getElementById("algorithmDescriptor").innerHTML = `${name} is <i><b>unweighted</b></i> and <i><b>does not guarantee</b></i> the shortest path!`;
@@ -982,8 +947,10 @@ Board.prototype.changeStartNodeImages = function() {
       let backgroundImage = document.styleSheets["1"].rules[j].style.backgroundImage;
       document.styleSheets["1"].rules[j].style.backgroundImage = backgroundImage.replace("triangle", "spaceship");
     }
-  } else {
-    if (this.currentAlgorithm === "greedy" || this.currentAlgorithm === "CLA") {
+  } 
+  
+  else {
+    if (this.currentAlgorithm === "greedy") {
       document.getElementById("algorithmDescriptor").innerHTML = `${name} is <i><b>weighted</b></i> and <i><b>does not guarantee</b></i> the shortest path!`;
     }
     document.getElementById("weightLegend").className = "";
@@ -993,6 +960,8 @@ Board.prototype.changeStartNodeImages = function() {
       document.styleSheets["1"].rules[j].style.backgroundImage = backgroundImage.replace("spaceship", "triangle");
     }
   }
+
+  
   if (this.currentAlgorithm === "bidirectional") {
 
     document.getElementById("algorithmDescriptor").innerHTML = `${name} is <i><b>weighted</b></i> and <i><b>does not guarantee</b></i> the shortest path!`;
@@ -1008,6 +977,7 @@ Board.prototype.changeStartNodeImages = function() {
 };
 
 let counter = 1;
+
 Board.prototype.toggleTutorialButtons = function() {
 
   document.getElementById("skipButton").onclick = () => {
@@ -1015,39 +985,10 @@ Board.prototype.toggleTutorialButtons = function() {
     this.toggleButtons();
   }
 
-  if (document.getElementById("nextButton")) {
-    document.getElementById("nextButton").onclick = () => {
-      if (counter < 9) counter++;
-      nextPreviousClick();
-      this.toggleTutorialButtons();
-    }
-  }
-
-  document.getElementById("previousButton").onclick = () => {
-    if (counter > 1) counter--;
-    nextPreviousClick();
-    this.toggleTutorialButtons()
-  }
-
+  
   let board = this;
   function nextPreviousClick() {
-    if (counter === 1) {
-      document.getElementById("tutorial").innerHTML = `<h3>Welcome to Pathfinding Visualizer!</h3><h6>This short tutorial will walk you through all of the features of this application.</h6><p>If you want to dive right in, feel free to press the "Skip Tutorial" button below. Otherwise, press "Next"!</p><div id="tutorialCounter">1/9</div><img id="mainTutorialImage" src="public/styling/c_icon.png"><button id="nextButton" class="btn btn-default navbar-btn" type="button">Next</button><button id="previousButton" class="btn btn-default navbar-btn" type="button">Previous</button><button id="skipButton" class="btn btn-default navbar-btn" type="button">Skip Tutorial</button>`
-    } else if (counter === 2) {
-      document.getElementById("tutorial").innerHTML = `<h3>What is a pathfinding algorithm?</h3><h6>At its core, a pathfinding algorithm seeks to find the shortest path between two points. This application visualizes various pathfinding algorithms in action, and more!</h6><p>All of the algorithms on this application are adapted for a 2D grid, where 90 degree turns have a "cost" of 1 and movements from a node to another have a "cost" of 1.</p><div id="tutorialCounter">${counter}/9</div><img id="mainTutorialImage" src="public/styling/path.png"><button id="nextButton" class="btn btn-default navbar-btn" type="button">Next</button><button id="previousButton" class="btn btn-default navbar-btn" type="button">Previous</button><button id="skipButton" class="btn btn-default navbar-btn" type="button">Skip Tutorial</button>`
-    } else if (counter === 3) {
-      document.getElementById("tutorial").innerHTML = `<h3>Picking an algorithm</h3><h6>Choose an algorithm from the "Algorithms" drop-down menu.</h6><p>Note that some algorithms are <i><b>unweighted</b></i>, while others are <i><b>weighted</b></i>. Unweighted algorithms do not take turns or weight nodes into account, whereas weighted ones do. Additionally, not all algorithms guarantee the shortest path. </p><img id="secondTutorialImage" src="public/styling/algorithms.png"><div id="tutorialCounter">${counter}/9</div><button id="nextButton" class="btn btn-default navbar-btn" type="button">Next</button><button id="previousButton" class="btn btn-default navbar-btn" type="button">Previous</button><button id="skipButton" class="btn btn-default navbar-btn" type="button">Skip Tutorial</button>`
-    } else if (counter === 4) {
-      document.getElementById("tutorial").innerHTML = `<h3>Meet the algorithms</h3><h6>Not all algorithms are created equal.</h6><ul><li><b>Dijkstra's Algorithm</b> (weighted): the father of pathfinding algorithms; guarantees the shortest path</li><li><b>A* Search</b> (weighted): arguably the best pathfinding algorithm; uses heuristics to guarantee the shortest path much faster than Dijkstra's Algorithm</li><li><b>Greedy Best-first Search</b> (weighted): a faster, more heuristic-heavy version of A*; does not guarantee the shortest path</li><li><b>Swarm Algorithm</b> (weighted): a mixture of Dijkstra's Algorithm and A*; does not guarantee the shortest-path</li><li><b>Convergent Swarm Algorithm</b> (weighted): the faster, more heuristic-heavy version of Swarm; does not guarantee the shortest path</li><li><b>Bidirectional Swarm Algorithm</b> (weighted): Swarm from both sides; does not guarantee the shortest path</li><li><b>Breath-first Search</b> (unweighted): a great algorithm; guarantees the shortest path</li><li><b>Depth-first Search</b> (unweighted): a very bad algorithm for pathfinding; does not guarantee the shortest path</li></ul><div id="tutorialCounter">${counter}/9</div><button id="nextButton" class="btn btn-default navbar-btn" type="button">Next</button><button id="previousButton" class="btn btn-default navbar-btn" type="button">Previous</button><button id="skipButton" class="btn btn-default navbar-btn" type="button">Skip Tutorial</button>`
-    } else if (counter === 5) {
-      document.getElementById("tutorial").innerHTML = `<h3>Adding walls and weights</h3><h6>Click on the grid to add a wall. Click on the grid while pressing W to add a weight. Generate mazes and patterns from the "Mazes & Patterns" drop-down menu.</h6><p>Walls are impenetrable, meaning that a path cannot cross through them. Weights, however, are not impassable. They are simply more "costly" to move through. In this application, moving through a weight node has a "cost" of 15.</p><img id="secondTutorialImage" src="public/styling/walls.gif"><div id="tutorialCounter">${counter}/9</div><button id="nextButton" class="btn btn-default navbar-btn" type="button">Next</button><button id="previousButton" class="btn btn-default navbar-btn" type="button">Previous</button><button id="skipButton" class="btn btn-default navbar-btn" type="button">Skip Tutorial</button>`
-    } else if (counter === 6) {
-      document.getElementById("tutorial").innerHTML = `<h3>Adding a bomb</h3><h6>Click the "Add Bomb" button.</h6><p>Adding a bomb will change the course of the chosen algorithm. In other words, the algorithm will first look for the bomb (in an effort to diffuse it) and will then look for the target node. Note that the Bidirectional Swarm Algorithm does not support adding a bomb.</p><img id="secondTutorialImage" src="public/styling/bomb.png"><div id="tutorialCounter">${counter}/9</div><button id="nextButton" class="btn btn-default navbar-btn" type="button">Next</button><button id="previousButton" class="btn btn-default navbar-btn" type="button">Previous</button><button id="skipButton" class="btn btn-default navbar-btn" type="button">Skip Tutorial</button>`
-    } else if (counter === 7) {
-      document.getElementById("tutorial").innerHTML = `<h3>Dragging nodes</h3><h6>Click and drag the start, bomb, and target nodes to move them.</h6><p>Note that you can drag nodes even after an algorithm has finished running. This will allow you to instantly see different paths.</p><img src="public/styling/dragging.gif"><div id="tutorialCounter">${counter}/9</div><button id="nextButton" class="btn btn-default navbar-btn" type="button">Next</button><button id="previousButton" class="btn btn-default navbar-btn" type="button">Previous</button><button id="skipButton" class="btn btn-default navbar-btn" type="button">Skip Tutorial</button>`
-    } else if (counter === 8) {
-      document.getElementById("tutorial").innerHTML = `<h3>Visualizing and more</h3><h6>Use the navbar buttons to visualize algorithms and to do other stuff!</h6><p>You can clear the current path, clear walls and weights, clear the entire board, and adjust the visualization speed, all from the navbar. If you want to access this tutorial again, click on "Pathfinding Visualizer" in the top left corner of your screen.</p><img id="secondTutorialImage" src="public/styling/navbar.png"><div id="tutorialCounter">${counter}/9</div><button id="nextButton" class="btn btn-default navbar-btn" type="button">Next</button><button id="previousButton" class="btn btn-default navbar-btn" type="button">Previous</button><button id="skipButton" class="btn btn-default navbar-btn" type="button">Skip Tutorial</button>`
-    } else if (counter === 9) {
+      if (counter === 1)  {
       document.getElementById("tutorial").innerHTML = `<h3>Enjoy!</h3><h6>I hope you have just as much fun playing around with this visualization tool as I had building it!</h6><p>If you want to see the source code for this application, check out my <a href="https://github.com/clementmihailescu/Pathfinding-Visualizer">github</a>.</p><div id="tutorialCounter">${counter}/9</div><button id="finishButton" class="btn btn-default navbar-btn" type="button">Finish</button><button id="previousButton" class="btn btn-default navbar-btn" type="button">Previous</button><button id="skipButton" class="btn btn-default navbar-btn" type="button">Skip Tutorial</button>`
       document.getElementById("finishButton").onclick = () => {
         document.getElementById("tutorial").style.display = "none";
@@ -1072,7 +1013,7 @@ Board.prototype.toggleButtons = function() {
       } else {
         this.clearPath("clickedButton");
         this.toggleButtons();
-        let weightedAlgorithms = ["dijkstra", "CLA", "CLA", "greedy"];
+        let weightedAlgorithms = ["dijkstra","greedy"];
         let unweightedAlgorithms = ["dfs", "bfs"];
         let success;
         if (this.currentAlgorithm === "bidirectional") {
@@ -1143,22 +1084,7 @@ Board.prototype.toggleButtons = function() {
     }
 
 
-    document.getElementById("startButtonBidirectional").onclick = () => {
-      document.getElementById("startButtonStart").innerHTML = '<button id="actualStartButton" class="btn btn-default navbar-btn" type="button">Visualize Bidirectional Swarm!</button>'
-      this.currentAlgorithm = "bidirectional";
-      this.currentHeuristic = "manhattanDistance";
-      if (this.numberOfObjects) {
-        let objectNodeId = this.object;
-        document.getElementById("startButtonAddObject").innerHTML = '<a href="#">Add a Bomb</a></li>';
-        document.getElementById(objectNodeId).className = "unvisited";
-        this.object = null;
-        this.numberOfObjects = 0;
-        this.nodes[objectNodeId].status = "unvisited";
-        this.isObject = false;
-      }
-      this.clearPath("clickedButton");
-      this.changeStartNodeImages();
-    }
+    
 
     document.getElementById("startButtonDijkstra").onclick = () => {
       document.getElementById("startButtonStart").innerHTML = '<button id="actualStartButton" class="btn btn-default navbar-btn" type="button">Visualize Dijkstra\'s!</button>'
@@ -1166,13 +1092,7 @@ Board.prototype.toggleButtons = function() {
       this.changeStartNodeImages();
     }
 
-    document.getElementById("startButtonAStar").onclick = () => {
-      document.getElementById("startButtonStart").innerHTML = '<button id="actualStartButton" class="btn btn-default navbar-btn" type="button">Visualize Swarm!</button>'
-      this.currentAlgorithm = "CLA";
-      this.currentHeuristic = "manhattanDistance"
-      this.changeStartNodeImages();
-    }
-
+   
     document.getElementById("startButtonAStar2").onclick = () => {
       document.getElementById("startButtonStart").innerHTML = '<button id="actualStartButton" class="btn btn-default navbar-btn" type="button">Visualize A*!</button>'
       this.currentAlgorithm = "astar";
@@ -1180,13 +1100,7 @@ Board.prototype.toggleButtons = function() {
       this.changeStartNodeImages();
     }
 
-    document.getElementById("startButtonAStar3").onclick = () => {
-      document.getElementById("startButtonStart").innerHTML = '<button id="actualStartButton" class="btn btn-default navbar-btn" type="button">Visualize Convergent Swarm!</button>'
-      this.currentAlgorithm = "CLA";
-      this.currentHeuristic = "extraPoweredManhattanDistance"
-      this.changeStartNodeImages();
-    }
-
+    
     document.getElementById("startButtonGreedy").onclick = () => {
       document.getElementById("startButtonStart").innerHTML = '<button id="actualStartButton" class="btn btn-default navbar-btn" type="button">Visualize Greedy!</button>'
       this.currentAlgorithm = "greedy";
@@ -1207,29 +1121,31 @@ Board.prototype.toggleButtons = function() {
       this.changeStartNodeImages();
     }
 
-    document.getElementById("startButtonCreateMazeOne").onclick = () => {
+     document.getElementById("startButtonCreateMazeOne").onclick = () => {
+       this.clearWalls();
+       this.clearPath("clickedButton");
+       this.createMazeOne("wall");
+     }
+
+     document.getElementById("startButtonCreateMazeTwo").onclick = () => {
+       this.clearWalls();
+       this.clearPath("clickedButton");
+       this.toggleButtons();
+       recursiveDivisionMaze(this, 2, this.height - 3, 2, this.width - 3, "horizontal", false, "wall");
+       mazeGenerationAnimations(this);
+     }
+
+     document.getElementById("startButtonCreateMazeWeights").onclick = () => {
+       this.clearWalls();
+       this.clearPath("clickedButton");
+       this.createMazeOne("weight");
+     }
+
+document.getElementById("startButtonClearBoard").onclick = () => {
       this.clearWalls();
       this.clearPath("clickedButton");
-      this.createMazeOne("wall");
-    }
-
-    document.getElementById("startButtonCreateMazeTwo").onclick = () => {
-      this.clearWalls();
-      this.clearPath("clickedButton");
-      this.toggleButtons();
-      recursiveDivisionMaze(this, 2, this.height - 3, 2, this.width - 3, "horizontal", false, "wall");
-      mazeGenerationAnimations(this);
-    }
-
-    document.getElementById("startButtonCreateMazeWeights").onclick = () => {
-      this.clearWalls();
-      this.clearPath("clickedButton");
-      this.createMazeOne("weight");
-    }
-
-    document.getElementById("startButtonClearBoard").onclick = () => {
-      document.getElementById("startButtonAddObject").innerHTML = '<a href="#">Add Bomb</a></li>';
-
+    
+    
 
 
       let navbarHeight = document.getElementById("navbarDiv").clientHeight;
@@ -1291,21 +1207,21 @@ Board.prototype.toggleButtons = function() {
       this.clearPath("clickedButton");
     }
 
-    document.getElementById("startButtonCreateMazeThree").onclick = () => {
-      this.clearWalls();
-      this.clearPath("clickedButton");
-      this.toggleButtons();
-      otherMaze(this, 2, this.height - 3, 2, this.width - 3, "vertical", false);
-      mazeGenerationAnimations(this);
-    }
+     document.getElementById("startButtonCreateMazeThree").onclick = () => {
+       this.clearWalls();
+       this.clearPath("clickedButton");
+       this.toggleButtons();
+       otherMaze(this, 2, this.height - 3, 2, this.width - 3, "vertical", false);
+       mazeGenerationAnimations(this);
+     }
 
-    document.getElementById("startButtonCreateMazeFour").onclick = () => {
-      this.clearWalls();
-      this.clearPath("clickedButton");
-      this.toggleButtons();
-      otherOtherMaze(this, 2, this.height - 3, 2, this.width - 3, "horizontal", false);
-      mazeGenerationAnimations(this);
-    }
+     document.getElementById("startButtonCreateMazeFour").onclick = () => {
+       this.clearWalls();
+       this.clearPath("clickedButton");
+       this.toggleButtons();
+       otherOtherMaze(this, 2, this.height - 3, 2, this.width - 3, "horizontal", false);
+       mazeGenerationAnimations(this);
+     }
 
     document.getElementById("startButtonAddObject").onclick = () => {
       let innerHTML = document.getElementById("startButtonAddObject").innerHTML;
@@ -1344,12 +1260,12 @@ Board.prototype.toggleButtons = function() {
     if (this.currentAlgorithm !== "bidirectional") {
       document.getElementById("startButtonAddObject").className = "navbar-inverse navbar-nav";
     }
-    document.getElementById("startButtonCreateMazeOne").className = "navbar-inverse navbar-nav";
-    document.getElementById("startButtonCreateMazeTwo").className = "navbar-inverse navbar-nav";
-    document.getElementById("startButtonCreateMazeThree").className = "navbar-inverse navbar-nav";
-    document.getElementById("startButtonCreateMazeFour").className = "navbar-inverse navbar-nav";
-    document.getElementById("startButtonCreateMazeWeights").className = "navbar-inverse navbar-nav";
-    document.getElementById("startStairDemonstration").className = "navbar-inverse navbar-nav";
+     document.getElementById("startButtonCreateMazeOne").className = "navbar-inverse navbar-nav";
+     document.getElementById("startButtonCreateMazeTwo").className = "navbar-inverse navbar-nav";
+     document.getElementById("startButtonCreateMazeThree").className = "navbar-inverse navbar-nav";
+     document.getElementById("startButtonCreateMazeFour").className = "navbar-inverse navbar-nav";
+     document.getElementById("startButtonCreateMazeWeights").className = "navbar-inverse navbar-nav";
+     document.getElementById("startStairDemonstration").className = "navbar-inverse navbar-nav";
     document.getElementById("startButtonDFS").className = "navbar-inverse navbar-nav";
     document.getElementById("startButtonBFS").className = "navbar-inverse navbar-nav";
     document.getElementById("startButtonDijkstra").className = "navbar-inverse navbar-nav";
@@ -1393,7 +1309,6 @@ Board.prototype.toggleButtons = function() {
     document.getElementById("adjustSlow").className = "navbar-inverse navbar-nav disabledA";
     document.getElementById("startButtonClearPath").className = "navbar-inverse navbar-nav disabledA";
     document.getElementById("startButtonClearWalls").className = "navbar-inverse navbar-nav disabledA";
-    document.getElementById("startButtonClearBoard").className = "navbar-inverse navbar-nav disabledA";
     document.getElementById("startButtonAddObject").className = "navbar-inverse navbar-nav disabledA";
     document.getElementById("startButtonCreateMazeOne").className = "navbar-inverse navbar-nav disabledA";
     document.getElementById("startButtonCreateMazeTwo").className = "navbar-inverse navbar-nav disabledA";
@@ -1564,20 +1479,20 @@ function recursiveDivisionMaze(board, rowStart, rowEnd, colStart, colEnd, orient
         }
       }
     });
-    if (rowEnd - rowStart > currentCol - 2 - colStart) {
-      recursiveDivisionMaze(board, rowStart, rowEnd, colStart, currentCol - 2, "vertical", surroundingWalls);
-    } else {
-      recursiveDivisionMaze(board, rowStart, rowEnd, colStart, currentCol - 2, orientation, surroundingWalls);
-    }
-    if (rowEnd - rowStart > colEnd - (currentCol + 2)) {
-      recursiveDivisionMaze(board, rowStart, rowEnd, currentCol + 2, colEnd, "horizontal", surroundingWalls);
-    } else {
-      recursiveDivisionMaze(board, rowStart, rowEnd, currentCol + 2, colEnd, orientation, surroundingWalls);
-    }
+     if (rowEnd - rowStart > currentCol - 2 - colStart) {
+       recursiveDivisionMaze(board, rowStart, rowEnd, colStart, currentCol - 2, "vertical", surroundingWalls);
+     } else {
+       recursiveDivisionMaze(board, rowStart, rowEnd, colStart, currentCol - 2, orientation, surroundingWalls);
+     }
+     if (rowEnd - rowStart > colEnd - (currentCol + 2)) {
+       recursiveDivisionMaze(board, rowStart, rowEnd, currentCol + 2, colEnd, "horizontal", surroundingWalls);
+     } else {
+       recursiveDivisionMaze(board, rowStart, rowEnd, currentCol + 2, colEnd, orientation, surroundingWalls);
+     }
   }
 };
 
-module.exports = recursiveDivisionMaze;
+ module.exports = recursiveDivisionMaze;
 
 },{}],7:[function(require,module,exports){
 function recursiveDivisionMaze(board, rowStart, rowEnd, colStart, colEnd, orientation, surroundingWalls) {
@@ -1658,20 +1573,20 @@ function recursiveDivisionMaze(board, rowStart, rowEnd, colStart, colEnd, orient
         }
       }
     });
-    if (rowEnd - rowStart > currentCol - 2 - colStart) {
-      recursiveDivisionMaze(board, rowStart, rowEnd, colStart, currentCol - 2, "horizontal", surroundingWalls);
-    } else {
-      recursiveDivisionMaze(board, rowStart, rowEnd, colStart, currentCol - 2, "horizontal", surroundingWalls);
-    }
-    if (rowEnd - rowStart > colEnd - (currentCol + 2)) {
-      recursiveDivisionMaze(board, rowStart, rowEnd, currentCol + 2, colEnd, "horizontal", surroundingWalls);
-    } else {
-      recursiveDivisionMaze(board, rowStart, rowEnd, currentCol + 2, colEnd, orientation, surroundingWalls);
-    }
+     if (rowEnd - rowStart > currentCol - 2 - colStart) {
+       recursiveDivisionMaze(board, rowStart, rowEnd, colStart, currentCol - 2, "horizontal", surroundingWalls);
+     } else {
+       recursiveDivisionMaze(board, rowStart, rowEnd, colStart, currentCol - 2, "horizontal", surroundingWalls);
+     }
+     if (rowEnd - rowStart > colEnd - (currentCol + 2)) {
+       recursiveDivisionMaze(board, rowStart, rowEnd, currentCol + 2, colEnd, "horizontal", surroundingWalls);
+     } else {
+       recursiveDivisionMaze(board, rowStart, rowEnd, currentCol + 2, colEnd, orientation, surroundingWalls);
+     }
   }
 };
 
-module.exports = recursiveDivisionMaze;
+ module.exports = recursiveDivisionMaze;
 
 },{}],8:[function(require,module,exports){
 function recursiveDivisionMaze(board, rowStart, rowEnd, colStart, colEnd, orientation, surroundingWalls, type) {
@@ -1768,20 +1683,20 @@ function recursiveDivisionMaze(board, rowStart, rowEnd, colStart, colEnd, orient
           }        }
       }
     });
-    if (rowEnd - rowStart > currentCol - 2 - colStart) {
-      recursiveDivisionMaze(board, rowStart, rowEnd, colStart, currentCol - 2, "horizontal", surroundingWalls, type);
-    } else {
-      recursiveDivisionMaze(board, rowStart, rowEnd, colStart, currentCol - 2, orientation, surroundingWalls, type);
-    }
-    if (rowEnd - rowStart > colEnd - (currentCol + 2)) {
-      recursiveDivisionMaze(board, rowStart, rowEnd, currentCol + 2, colEnd, "horizontal", surroundingWalls, type);
-    } else {
-      recursiveDivisionMaze(board, rowStart, rowEnd, currentCol + 2, colEnd, orientation, surroundingWalls, type);
-    }
+     if (rowEnd - rowStart > currentCol - 2 - colStart) {
+       recursiveDivisionMaze(board, rowStart, rowEnd, colStart, currentCol - 2, "horizontal", surroundingWalls, type);
+     } else {
+       recursiveDivisionMaze(board, rowStart, rowEnd, colStart, currentCol - 2, orientation, surroundingWalls, type);
+     }
+     if (rowEnd - rowStart > colEnd - (currentCol + 2)) {
+       recursiveDivisionMaze(board, rowStart, rowEnd, currentCol + 2, colEnd, "horizontal", surroundingWalls, type);
+     } else {
+       recursiveDivisionMaze(board, rowStart, rowEnd, currentCol + 2, colEnd, orientation, surroundingWalls, type);
+     }
   }
 };
 
-module.exports = recursiveDivisionMaze;
+ module.exports = recursiveDivisionMaze;
 
 },{}],9:[function(require,module,exports){
 function simpleDemonstration(board) {
@@ -1878,7 +1793,7 @@ function weightsDemonstration(board) {
   }
 }
 
-module.exports = weightsDemonstration;
+ module.exports = weightsDemonstration;
 
 },{}],12:[function(require,module,exports){
 function Node(id, status) {
@@ -1996,30 +1911,7 @@ function getNeighbors(id, nodes, boardArray) {
     potentialNeighbor = `${x.toString()}-${(y + 1).toString()}`
     if (nodes[potentialNeighbor].status !== "wall") neighbors.push(potentialNeighbor);
   }
-  // if (boardArray[x - 1] && boardArray[x - 1][y - 1]) {
-  //   potentialNeighbor = `${(x - 1).toString()}-${(y - 1).toString()}`
-  //   let potentialWallOne = `${(x - 1).toString()}-${y.toString()}`
-  //   let potentialWallTwo = `${x.toString()}-${(y - 1).toString()}`
-  //   if (nodes[potentialNeighbor].status !== "wall" && !(nodes[potentialWallOne].status === "wall" && nodes[potentialWallTwo].status === "wall")) neighbors.push(potentialNeighbor);
-  // }
-  // if (boardArray[x + 1] && boardArray[x + 1][y - 1]) {
-  //   potentialNeighbor = `${(x + 1).toString()}-${(y - 1).toString()}`
-  //   let potentialWallOne = `${(x + 1).toString()}-${y.toString()}`
-  //   let potentialWallTwo = `${x.toString()}-${(y - 1).toString()}`
-  //   if (nodes[potentialNeighbor].status !== "wall" && !(nodes[potentialWallOne].status === "wall" && nodes[potentialWallTwo].status === "wall")) neighbors.push(potentialNeighbor);
-  // }
-  // if (boardArray[x - 1] && boardArray[x - 1][y + 1]) {
-  //   potentialNeighbor = `${(x - 1).toString()}-${(y + 1).toString()}`
-  //   let potentialWallOne = `${(x - 1).toString()}-${y.toString()}`
-  //   let potentialWallTwo = `${x.toString()}-${(y + 1).toString()}`
-  //   if (nodes[potentialNeighbor].status !== "wall" && !(nodes[potentialWallOne].status === "wall" && nodes[potentialWallTwo].status === "wall")) neighbors.push(potentialNeighbor);
-  // }
-  // if (boardArray[x + 1] && boardArray[x + 1][y + 1]) {
-  //   potentialNeighbor = `${(x + 1).toString()}-${(y + 1).toString()}`
-  //   let potentialWallOne = `${(x + 1).toString()}-${y.toString()}`
-  //   let potentialWallTwo = `${x.toString()}-${(y + 1).toString()}`
-  //   if (nodes[potentialNeighbor].status !== "wall" && !(nodes[potentialWallOne].status === "wall" && nodes[potentialWallTwo].status === "wall")) neighbors.push(potentialNeighbor);
-  // }
+  
   return neighbors;
 }
 
@@ -2104,79 +1996,7 @@ function getDistance(nodeOne, nodeTwo) {
     } else if (nodeOne.direction === "down-left") {
       return [2.5, null, "right"];
     }
-  } /*else if (x2 < x1 && y2 < y1) {
-    if (nodeOne.direction === "up") {
-      return [1.5, ["f"], "up-left"];
-    } else if (nodeOne.direction === "right") {
-      return [2.5, ["l", "f"], "up-left"];
-    } else if (nodeOne.direction === "left") {
-      return [1.5, ["r", "f"], "up-left"];
-    } else if (nodeOne.direction === "down") {
-      return [2.5, ["r", "r", "f"], "up-left"];
-    } else if (nodeOne.direction === "up-right") {
-      return [2, null, "up-left"];
-    } else if (nodeOne.direction === "down-right") {
-      return [3, null, "up-left"];
-    } else if (nodeOne.direction === "up-left") {
-      return [1, null, "up-left"];
-    } else if (nodeOne.direction === "down-left") {
-      return [2, null, "up-left"];
-    }
-  } else if (x2 < x1 && y2 > y1) {
-    if (nodeOne.direction === "up") {
-      return [1.5, ["f"], "up-right"];
-    } else if (nodeOne.direction === "right") {
-      return [1.5, ["l", "f"], "up-right"];
-    } else if (nodeOne.direction === "left") {
-      return [2.5, ["r", "f"], "up-right"];
-    } else if (nodeOne.direction === "down") {
-      return [2.5, ["r", "r", "f"], "up-right"];
-    } else if (nodeOne.direction === "up-right") {
-      return [1, null, "up-right"];
-    } else if (nodeOne.direction === "down-right") {
-      return [2, null, "up-right"];
-    } else if (nodeOne.direction === "up-left") {
-      return [2, null, "up-right"];
-    } else if (nodeOne.direction === "down-left") {
-      return [3, null, "up-right"];
-    }
-  } else if (x2 > x1 && y2 > y1) {
-    if (nodeOne.direction === "up") {
-      return [2.5, ["f"], "down-right"];
-    } else if (nodeOne.direction === "right") {
-      return [1.5, ["l", "f"], "down-right"];
-    } else if (nodeOne.direction === "left") {
-      return [2.5, ["r", "f"], "down-right"];
-    } else if (nodeOne.direction === "down") {
-      return [1.5, ["r", "r", "f"], "down-right"];
-    } else if (nodeOne.direction === "up-right") {
-      return [2, null, "down-right"];
-    } else if (nodeOne.direction === "down-right") {
-      return [1, null, "down-right"];
-    } else if (nodeOne.direction === "up-left") {
-      return [3, null, "down-right"];
-    } else if (nodeOne.direction === "down-left") {
-      return [2, null, "down-right"];
-    }
-  } else if (x2 > x1 && y2 < y1) {
-    if (nodeOne.direction === "up") {
-      return [2.5, ["f"], "down-left"];
-    } else if (nodeOne.direction === "right") {
-      return [2.5, ["l", "f"], "down-left"];
-    } else if (nodeOne.direction === "left") {
-      return [1.5, ["r", "f"], "down-left"];
-    } else if (nodeOne.direction === "down") {
-      return [1.5, ["r", "r", "f"], "down-left"];
-    } else if (nodeOne.direction === "up-right") {
-      return [3, null, "down-left"];
-    } else if (nodeOne.direction === "down-right") {
-      return [2, null, "down-left"];
-    } else if (nodeOne.direction === "up-left") {
-      return [2, null, "down-left"];
-    } else if (nodeOne.direction === "down-left") {
-      return [1, null, "down-left"];
-    }
-  }*/
+  } 
 }
 
 function manhattanDistance(nodeOne, nodeTwo) {
@@ -2693,7 +2513,7 @@ function weightedSearchAlgorithm(nodes, start, target, nodesToAnimate, boardArra
     nodesToAnimate.push(currentNode);
     currentNode.status = "visited";
     if (currentNode.id === target) return "success!";
-    if (name === "CLA" || name === "greedy") {
+    if (/*name === "CLA" || */name === "greedy") {
       updateNeighbors(nodes, currentNode, boardArray, target, name, start, heuristic);
     } else if (name === "dijkstra") {
       updateNeighbors(nodes, currentNode, boardArray);
@@ -2990,7 +2810,6 @@ function weightedManhattanDistance(nodeOne, nodeTwo, nodes) {
     }
 
   return xChange + yChange;
-
 
 }
 
